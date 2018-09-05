@@ -1,6 +1,7 @@
 package cs601.project1;
 
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.TreeSet;
 
 public class AmazonAnswer {
@@ -13,8 +14,57 @@ public class AmazonAnswer {
 	}
 	
 	
-	public void anser() {
-		
+	public void answer() {
+		Scanner s = new Scanner(System.in);
+		String input = s.nextLine();
+		while(true) {
+			if(input == null) {
+				input = s.nextLine();
+			}else if(input.equals("exit")) {
+				System.exit(1);
+			}else {
+				this.request(input);
+				input = s.nextLine();
+			}
+		}
+//		while(true) {
+//			try(Scanner reader = new Scanner(System.in)){
+//				while(!reader.hasNextLine()) {}
+//				String input = reader.nextLine();
+//				if(input.equals("exit")) {
+//					break;
+//				}else {
+//					this.request(input);
+//				}
+//			}
+//		}
+	}
+	
+	public void request(String input) {
+		String[] args = input.split(" ");
+		if(args.length != 2) {
+			System.out.println("invalid args length");
+			return;
+		}
+		if(args[0].equals("find")) {
+			System.out.println("go to find");
+			this.find(args[1]);
+		}else if(args[0].equals("reviewsearch")) {
+			System.out.println("go to review");
+			this.reviewSearch(args[1]);
+		}else if(args[0].equals("qasearch")) {
+			System.out.println("go to qa");
+			this.qaSearch(args[1]);
+		}else if(args[0].equals("reviewpartialsearch")) {
+			System.out.println("go to p review");
+			this.reviewPartialSearch(args[1]);
+		}else if(args[0].equals("qapartialsearch")) {
+			System.out.println("go to p qa");
+			this.qaPartialSearch(args[1]);
+		}else {
+			System.out.println("invalid input");
+		}
+		return;
 	}
 	
 	public void find(String asin) {

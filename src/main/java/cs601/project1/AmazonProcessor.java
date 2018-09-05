@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 
 public class AmazonProcessor {
 	private InvertedIndex forReview;
@@ -41,11 +42,12 @@ public class AmazonProcessor {
 		AmazonParser aParser = new AmazonParser();
 
 		JsonParser parser = new JsonParser();
-		
+		int read = 0;
 		try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(this.inputReview)));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "ISO-8859-1"),10 * 1024 * 1024)){
 			String line = reader.readLine();
 			while(line != null) {
+				read++;
 				JsonElement element = parser.parse(line);	
 				if(element.isJsonObject()) {
 					JsonObject jo = (JsonObject) element;
@@ -61,11 +63,14 @@ public class AmazonProcessor {
 		}catch(JsonSyntaxException jse) {
 			System.out.println(jse.getMessage());
 		}
+		System.out.println("we read review lines: " + read);
 		
+		read = 0;
 		try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(this.inputQA)));
 				BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "ISO-8859-1"),10 * 1024 * 1024)){
 				String line = reader.readLine();
 				while(line != null) {
+					read++;
 					JsonElement element = parser.parse(line);	
 					if(element.isJsonObject()) {
 						JsonObject jo = (JsonObject) element;
@@ -82,7 +87,7 @@ public class AmazonProcessor {
 			}catch(JsonSyntaxException jse) {
 				System.out.println(jse.getMessage());
 			}
-		
+		System.out.println("we read QA lines: " + read);
 	}
 
 	public InvertedIndex getForReview() {
