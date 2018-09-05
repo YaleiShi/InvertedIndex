@@ -24,5 +24,10 @@ public abstract class AmazonMessage {
 		return termFrequency;
 	}
 	
+	public void print() {
+		for(String s: this.termFrequency.keySet()) {
+			System.out.println("word: " + s + " times: " + this.termFrequency.get(s));
+		}
+	}
 	
 }

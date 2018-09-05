@@ -31,7 +31,7 @@ public class AmazonProcessor {
 		if(args.length != 4) return false;
 		for(int i = 0; i< 3; i++) {
 			if(args[i].equals("-reviews")) this.inputReview = args[i + 1];
-			if(args[i].equals("qa")) this.inputQA = args[i + 1];
+			if(args[i].equals("-qa")) this.inputQA = args[i + 1];
 		}
 		if(this.inputQA == null || this.inputReview == null) return false;
 		return true;
@@ -45,14 +45,15 @@ public class AmazonProcessor {
 		try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(this.inputReview)));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "ISO-8859-1"),10 * 1024 * 1024)){
 			String line = reader.readLine();
-			JsonElement element = parser.parse(line);	
-			if(element.isJsonObject()) {
-				JsonObject jo = (JsonObject) element;
-				AmazonMessage am = aParser.parse(jo, true);
-				this.forReview.add(am);
+			while(line != null) {
+				JsonElement element = parser.parse(line);	
+				if(element.isJsonObject()) {
+					JsonObject jo = (JsonObject) element;
+					AmazonMessage am = aParser.parse(jo, true);
+					this.forReview.add(am);
+				}
+				line = reader.readLine();
 			}	
-				
-				
 		}catch(FileNotFoundException fnfe) {
 			System.out.println(fnfe.getMessage());
 		}catch(IOException ioe) {
@@ -64,12 +65,16 @@ public class AmazonProcessor {
 		try(BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(this.inputQA)));
 				BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "ISO-8859-1"),10 * 1024 * 1024)){
 				String line = reader.readLine();
-				JsonElement element = parser.parse(line);	
-				if(element.isJsonObject()) {
-					JsonObject jo = (JsonObject) element;
-					AmazonMessage am = aParser.parse(jo, false);
-					this.forQA.add(am);
-				}	
+				while(line != null) {
+					JsonElement element = parser.parse(line);	
+					if(element.isJsonObject()) {
+						JsonObject jo = (JsonObject) element;
+						AmazonMessage am = aParser.parse(jo, false);
+						this.forQA.add(am);
+					}	
+					line = reader.readLine();
+				}
+				
 			}catch(FileNotFoundException fnfe) {
 				System.out.println(fnfe.getMessage());
 			}catch(IOException ioe) {

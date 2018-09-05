@@ -35,5 +35,27 @@ public class InvertedIndex {
 			this.asinIndex.get(asin).add(message);
 		}
 	}
+	
+	public void print() {
+		System.out.println("reviews: ");
+		for(String s: this.termIndex.keySet()) {
+			System.out.print("word: " + s + "; documents: ");
+			TreeSet<AmazonMessage> ts = this.termIndex.get(s);
+			for(AmazonMessage am: ts) {
+				System.out.print(am.getAsin() + " ");
+			}
+			System.out.println();
+		}
+		
+		System.out.println("QAs: ");
+		for(String s: this.asinIndex.keySet()) {
+			System.out.print("word: " + s + "; documents: ");
+			HashSet<AmazonMessage> ts = this.asinIndex.get(s);
+			for(AmazonMessage am: ts) {
+				System.out.print(am.getAsin() + " ");
+			}
+			System.out.println();
+		}
+	}
 
 }
