@@ -9,7 +9,8 @@ public class ScoreComparator implements Comparator<AmazonMessage>{
 		// TODO Auto-generated method stub
 		AmazonReview ar1 = (AmazonReview) o1;
 		AmazonReview ar2 = (AmazonReview) o2;
-		return ar1.getScore().compareTo(ar2.getScore());
+		if(ar1.getScore().compareTo(ar2.getScore()) != 0) return ar1.getScore().compareTo(ar2.getScore());
+		return 1;
 	}
 
 }

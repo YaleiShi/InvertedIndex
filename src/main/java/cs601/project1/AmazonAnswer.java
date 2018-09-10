@@ -1,7 +1,10 @@
 package cs601.project1;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class AmazonAnswer {
@@ -15,6 +18,7 @@ public class AmazonAnswer {
 	
 	
 	public void answer() {
+		this.prepareUI();
 		Scanner s = new Scanner(System.in);
 		String input = s.nextLine();
 		while(true) {
@@ -27,17 +31,16 @@ public class AmazonAnswer {
 				input = s.nextLine();
 			}
 		}
-//		while(true) {
-//			try(Scanner reader = new Scanner(System.in)){
-//				while(!reader.hasNextLine()) {}
-//				String input = reader.nextLine();
-//				if(input.equals("exit")) {
-//					break;
-//				}else {
-//					this.request(input);
-//				}
-//			}
-//		}
+	}
+	
+	public void prepareUI() {
+		System.out.println("Welcome, please endter these commands: \n"
+				         + "         find <asin>\n"
+				         + "         reviewsearch <term>\n"
+				         + "         qasearch <term>\n"
+				         + "         reviewpartialsearch <part of the term>\n"
+				         + "         qapartialsearch <part of the term>\n"
+				         + "         exit");
 	}
 	
 	public void request(String input) {
@@ -71,11 +74,11 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("find asin number: " + asin + "\n");
 		sb.append("********** Reviews ***********\n");
-		HashSet<AmazonMessage> hs = this.forReview.asinIndex.get(asin);
-		if(hs == null) {
+		ArrayList<AmazonMessage> al = this.forReview.asinIndex.get(asin);
+		if(al == null) {
 			sb.append("no review\n");
 		}else {
-			for(AmazonMessage am: hs) {
+			for(AmazonMessage am: al) {
 				AmazonReview ar = (AmazonReview) am;
 				sb.append("Review ID: " + ar.getReviewID() + "\n");
 				sb.append("Score: " + ar.getScore() + "\n");
@@ -85,11 +88,11 @@ public class AmazonAnswer {
 		
 
 		sb.append("********** QAs ***********\n");
-		hs = this.forQA.asinIndex.get(asin);
-		if(hs == null) {
+		al = this.forQA.asinIndex.get(asin);
+		if(al == null) {
 			sb.append("no QA\n=======================\n");
 		}else {
-			for(AmazonMessage am: hs) {
+			for(AmazonMessage am: al) {
 				AmazonQA ar = (AmazonQA) am;
 				sb.append("Question: " + ar.getQuestion() + "\n");
 				sb.append("Answer: " + ar.getAnswer() + "\n\n");
@@ -101,18 +104,22 @@ public class AmazonAnswer {
 	}
 	
 	public void reviewSearch(String term) {
+		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
-		TreeSet<AmazonMessage> ts = this.forReview.termIndex.get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forReview.termIndex.get(term);
 		if(ts == null) {
 			sb.append("no review\n========================\n");
 		}else {
-			for(AmazonMessage am: ts) {
-				AmazonReview ar = (AmazonReview) am;
-				sb.append("Review ID: " + ar.getReviewID() + "\n");
-				sb.append("Score: " + ar.getScore() + "\n");
-				sb.append("Text: " + ar.getText() + "\n\n");
+			for(int i: ts.keySet()) {
+				for(AmazonMessage am: ts.get(i)) {
+					AmazonReview ar = (AmazonReview) am;
+					sb.append("WordFrequency: " + i + "\n");
+					sb.append("Review ID: " + ar.getReviewID() + "\n");
+					sb.append("Score: " + ar.getScore() + "\n");
+					sb.append("Text: " + ar.getText() + "\n\n");
+				}
 			}
 			sb.append("=========================\n");
 		}
@@ -121,18 +128,23 @@ public class AmazonAnswer {
 	}
 	
 	public void qaSearch(String term) {
+		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
-		TreeSet<AmazonMessage> ts = this.forQA.termIndex.get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forQA.termIndex.get(term);
 		if(ts == null) {
 			sb.append("no QA\n========================\n");
 		}else {
-			for(AmazonMessage am: ts) {
+			for(int i: ts.keySet()) {
+				for(AmazonMessage am: ts.get(i)) {
 				AmazonQA ar = (AmazonQA) am;
+				sb.append("WordFrequency: " + i + "\n");
 				sb.append("Question: " + ar.getQuestion() + "\n");
 				sb.append("Answer: " + ar.getAnswer() + "\n\n");
+				}
 			}
+			
 			sb.append("=========================\n");
 		}
 
@@ -140,14 +152,19 @@ public class AmazonAnswer {
 	}
 	
 	public void reviewPartialSearch(String term) {
+		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
-		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>(new ScoreComparator());
+		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
 		for(String s: this.forReview.termIndex.keySet()) {
 			if(s.contains(term)) {
-				for(AmazonMessage am: this.forReview.termIndex.get(s)) {
-					ts.add(am);
+				System.out.println("we find: " + s);
+				TreeMap<Integer, ArrayList<AmazonMessage>> tm = this.forReview.termIndex.get(s);
+				for(ArrayList<AmazonMessage> al: tm.values()) {
+					for(AmazonMessage am: al) {
+						ts.add(am);
+					}
 				}
 			}
 		}
@@ -168,15 +185,20 @@ public class AmazonAnswer {
 	}
 	
 	public void qaPartialSearch(String term) {
+		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
-		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>(new AsinComparator());
+		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
 		for(String s: this.forQA.termIndex.keySet()) {
 			if(s.contains(term)) {
-				for(AmazonMessage am: this.forQA.termIndex.get(s)) {
-					ts.add(am);
+				System.out.println("we find: " + s);
+				for(ArrayList<AmazonMessage> al: this.forQA.termIndex.get(s).values()) {
+					for(AmazonMessage am: al) {
+						ts.add(am);
+					}
 				}
+				
 			}
 		}
 		

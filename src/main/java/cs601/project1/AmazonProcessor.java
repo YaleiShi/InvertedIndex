@@ -71,7 +71,13 @@ public class AmazonProcessor {
 				String line = reader.readLine();
 				while(line != null) {
 					read++;
-					JsonElement element = parser.parse(line);	
+					JsonElement element;
+					try {
+						element = parser.parse(line);
+					}catch(JsonSyntaxException jse) {
+						line = reader.readLine();
+						continue;
+					}	
 					if(element.isJsonObject()) {
 						JsonObject jo = (JsonObject) element;
 						AmazonMessage am = aParser.parse(jo, false);
@@ -84,8 +90,6 @@ public class AmazonProcessor {
 				System.out.println(fnfe.getMessage());
 			}catch(IOException ioe) {
 				System.out.println(ioe.getMessage());
-			}catch(JsonSyntaxException jse) {
-				System.out.println(jse.getMessage());
 			}
 		System.out.println("we read QA lines: " + read);
 	}
