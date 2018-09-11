@@ -5,12 +5,17 @@ import java.sql.Time;
 public class AmazonSearch {
 
 	public static void main(String[] args) {
-		String[] input = {"-reviews", "reviews_Cell_Phones_and_Accessories_5.json", "-qa", "qa_Cell_Phones_and_Accessories.json"};
-		AmazonProcessor ap = new AmazonProcessor(input);
+		AmazonProcessor ap = new AmazonProcessor(args);
+		if(!ap.getArgs(args)) {
+			System.out.println("input is not valid");
+			return;
+		}
+		
 		long start = System.currentTimeMillis();
 		ap.process();
 		long end = System.currentTimeMillis();
-		System.out.println("Runing Time: " + (end - start));
+		System.out.println("Loading Time: " + (end - start));
+		
 		AmazonAnswer aa = new AmazonAnswer(ap.getForReview(), ap.getForQA());
 		aa.answer();
 	}

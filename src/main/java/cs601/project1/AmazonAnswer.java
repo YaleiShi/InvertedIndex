@@ -7,16 +7,32 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * the answer class used to answer the request
+ * show the search result
+ * @author yalei
+ *
+ */
 public class AmazonAnswer {
 	private InvertedIndex forReview;
 	private InvertedIndex forQA;
 	
+	/**
+	 * the constructor,
+	 * take the two data base
+	 * @param forReview the review data base
+	 * @param forQA the QA data base
+	 */
 	public AmazonAnswer(InvertedIndex forReview, InvertedIndex forQA) {
 		this.forQA = forQA;
 		this.forReview = forReview;
 	}
 	
-	
+	/**
+	 * the function which keep accept the request from the command line
+	 * if request if not null, pass it to the request method
+	 * if the request if exit, end the program
+	 */
 	public void answer() {
 		this.prepareUI();
 		Scanner s = new Scanner(System.in);
@@ -33,6 +49,9 @@ public class AmazonAnswer {
 		}
 	}
 	
+	/**
+	 * prepare the start UI for the user
+	 */
 	public void prepareUI() {
 		System.out.println("Welcome, please endter these commands: \n"
 				         + "         find <asin>\n"
@@ -43,6 +62,12 @@ public class AmazonAnswer {
 				         + "         exit");
 	}
 	
+	/**
+	 * take the input string and judge if it is valid
+	 * if not, print message and return
+	 * if valid, pass it to the right function
+	 * @param input the command line input
+	 */
 	public void request(String input) {
 		String[] args = input.split(" ");
 		if(args.length != 2) {
@@ -70,11 +95,16 @@ public class AmazonAnswer {
 		return;
 	}
 	
+	/**
+	 * the function in charge of the command find
+	 * @param asin the asin number
+	 */
 	public void find(String asin) {
+		//search the review
 		StringBuilder sb = new StringBuilder();
 		sb.append("find asin number: " + asin + "\n");
 		sb.append("********** Reviews ***********\n");
-		ArrayList<AmazonMessage> al = this.forReview.asinIndex.get(asin);
+		ArrayList<AmazonMessage> al = this.forReview.getAsinIndex().get(asin);
 		if(al == null) {
 			sb.append("no review\n");
 		}else {
@@ -86,9 +116,9 @@ public class AmazonAnswer {
 			}
 		}
 		
-
+		//search the QA
 		sb.append("********** QAs ***********\n");
-		al = this.forQA.asinIndex.get(asin);
+		al = this.forQA.getAsinIndex().get(asin);
 		if(al == null) {
 			sb.append("no QA\n=======================\n");
 		}else {
@@ -103,12 +133,16 @@ public class AmazonAnswer {
 		System.out.println(sb);
 	}
 	
+	/**
+	 * the function in charge of the command reviewsearch
+	 * @param term the word user want to search
+	 */
 	public void reviewSearch(String term) {
 		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
-		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forReview.termIndex.get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forReview.getTermIndex().get(term);
 		if(ts == null) {
 			sb.append("no review\n========================\n");
 		}else {
@@ -127,12 +161,16 @@ public class AmazonAnswer {
 		System.out.println(sb);
 	}
 	
+	/**
+	 * the function in charge of the command qasearch
+	 * @param term the word user want to search
+	 */
 	public void qaSearch(String term) {
 		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
-		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forQA.termIndex.get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forQA.getTermIndex().get(term);
 		if(ts == null) {
 			sb.append("no QA\n========================\n");
 		}else {
@@ -151,16 +189,20 @@ public class AmazonAnswer {
 		System.out.println(sb);
 	}
 	
+	/**
+	 * the function of command reviewpartialsearch
+	 * @param term the string which user want to search
+	 */
 	public void reviewPartialSearch(String term) {
 		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
 		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
-		for(String s: this.forReview.termIndex.keySet()) {
+		for(String s: this.forReview.getTermIndex().keySet()) {
 			if(s.contains(term)) {
 				System.out.println("we find: " + s);
-				TreeMap<Integer, ArrayList<AmazonMessage>> tm = this.forReview.termIndex.get(s);
+				TreeMap<Integer, ArrayList<AmazonMessage>> tm = this.forReview.getTermIndex().get(s);
 				for(ArrayList<AmazonMessage> al: tm.values()) {
 					for(AmazonMessage am: al) {
 						ts.add(am);
@@ -184,16 +226,20 @@ public class AmazonAnswer {
 		System.out.println(sb);
 	}
 	
+	/**
+	 * the function of command qapartialsearch
+	 * @param term the string user want to include in the word
+	 */
 	public void qaPartialSearch(String term) {
 		term = term.toLowerCase();
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
 		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
-		for(String s: this.forQA.termIndex.keySet()) {
+		for(String s: this.forQA.getTermIndex().keySet()) {
 			if(s.contains(term)) {
 				System.out.println("we find: " + s);
-				for(ArrayList<AmazonMessage> al: this.forQA.termIndex.get(s).values()) {
+				for(ArrayList<AmazonMessage> al: this.forQA.getTermIndex().get(s).values()) {
 					for(AmazonMessage am: al) {
 						ts.add(am);
 					}

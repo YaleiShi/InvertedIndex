@@ -28,22 +28,18 @@ public class AmazonQA extends AmazonMessage implements Comparable<AmazonQA>{
 	@Override
 	public void calculateFrequency() {
 		// TODO Auto-generated method stub
-		String[] argsQ = this.question.split(" ");
-		String[] argsA = this.answer.split(" ");
+		this.calculateFrequency(this.question);
+		this.calculateFrequency(this.answer);
+	}
+	
+	/**
+	 * the function used to calculate the input text words frequency
+	 * @param input the text used to calculate
+	 */
+	public void calculateFrequency(String input) {
+		String[] args = input.split("\\s+");
 		
-		for(String s: argsQ) {
-			s = s.replaceAll("\\W", "");
-			s = s.toLowerCase();
-			if(!super.termFrequency.containsKey(s)) {
-				super.termFrequency.put(s, 1);
-			}else {
-				int freq = super.termFrequency.get(s);
-				freq++;
-				super.termFrequency.put(s, freq);
-			}
-		}
-		
-		for(String s: argsA) {
+		for(String s: args) {
 			s = s.replaceAll("\\W", "");
 			s = s.toLowerCase();
 			if(!super.termFrequency.containsKey(s)) {
@@ -56,14 +52,25 @@ public class AmazonQA extends AmazonMessage implements Comparable<AmazonQA>{
 		}
 	}
 
+	/**
+	 * get the text of question
+	 * @return the question text
+	 */
 	public String getQuestion() {
 		return question;
 	}
 
+	/**
+	 * get the text of answer
+	 * @return the answer text
+	 */
 	public String getAnswer() {
 		return answer;
 	}
 
+	/**
+	 * compare two AmazonQA
+	 */
 	@Override
 	public int compareTo(AmazonQA o) {
 		// TODO Auto-generated method stub

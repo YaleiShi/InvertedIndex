@@ -7,16 +7,44 @@ import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * the data structure to store all the AmazonMessage in the json text
+ * the data structure:
+ * String          Frequency           ArrayList of AmazonMessage
+ * cat   --------->   3      --------> {"cat cat cat", "cat dog cat cat"}
+ *                    2      --------> {"cat cat", "doge cat cat", "cat cat dog"}
+ * dog   --------->   2      --------> {"dog dog", "dog and dog"}
+ *                    1      --------> {"cat dog cat cat", "cat cat dog"}
+ * ......
+ * ...... 
+ * @author yalei
+ *
+ */
 public class InvertedIndex {
-	public HashMap<String, TreeMap<Integer, ArrayList<AmazonMessage>>> termIndex;
-	public HashMap<String, ArrayList<AmazonMessage>> asinIndex;
+	private HashMap<String, TreeMap<Integer, ArrayList<AmazonMessage>>> termIndex;
+	private HashMap<String, ArrayList<AmazonMessage>> asinIndex;
 	
+	/**
+	 * the consturctor of InvertedIndex
+	 */
 	public InvertedIndex() {
 		this.termIndex = new HashMap<String, TreeMap<Integer, ArrayList<AmazonMessage>>>();
 		this.asinIndex = new HashMap<String, ArrayList<AmazonMessage>>();
 	}
 	
+	/**
+	 * the function used to add one message into the termIndex and asinIndex;
+	 */
 	public void add(AmazonMessage message) {
+		this.addIntoTerm(message);
+		this.addIntoAsin(message);
+	}
+	
+	/**
+	 * the function to add the message into the termIndex
+	 * @param message the amazon message contains all the data
+	 */
+	public void addIntoTerm(AmazonMessage message) {
 		//add it into the termIndex by the hash map inside of it
 		for(String s: message.getTermFrequency().keySet()) {
 			if(!this.termIndex.containsKey(s)) {
@@ -35,7 +63,13 @@ public class InvertedIndex {
 				}
 			}
 		}
-		
+	}
+	
+	/**
+	 * the function to add message into the asinIndex
+	 * @param message the amazon message contains all the data
+	 */
+	public void addIntoAsin(AmazonMessage message) {
 		//add it into the asinIndex by the asin inside of the message
 		String asin = message.getAsin();
 		if(!this.asinIndex.containsKey(asin)) {
@@ -44,10 +78,30 @@ public class InvertedIndex {
 			this.asinIndex.put(asin, al);
 		}else {
 			this.asinIndex.get(asin).add(message);
-		}
+		}	
 	}
 	
-	public void print() {
+	/**
+	 * get the term index
+	 * @return the pointer to the term index
+	 */
+	public HashMap<String, TreeMap<Integer, ArrayList<AmazonMessage>>> getTermIndex() {
+		return termIndex;
+	}
+
+	/**
+	 * get the asin index
+	 * @return the pointer to the asin index
+	 */
+	public HashMap<String, ArrayList<AmazonMessage>> getAsinIndex() {
+		return asinIndex;
+	}
+
+	/**
+	 * the function just used to debug
+	 * print out the term list
+	 */
+	public void printTermList() {
 		System.out.println("Term List: ");
 		for(String s: this.termIndex.keySet()) {
 			System.out.println("word: " + s + "; documents: ");
@@ -59,7 +113,13 @@ public class InvertedIndex {
 				System.out.println();
 			}
 		}
-		
+	}
+	
+	/**
+	 * the function just used to debug
+	 * print out the asin list
+	 */
+	public void printAsinList() {
 		System.out.println("Asin List: ");
 		for(String s: this.asinIndex.keySet()) {
 			System.out.print("word: " + s + "; documents: ");
@@ -71,7 +131,12 @@ public class InvertedIndex {
 		}
 	}
 	
-	public class IntComparator implements Comparator<Integer>{
+	/**
+	 * the private  class just used to make the treeset sort by large to small
+	 * @author yalei
+	 *
+	 */
+	private class IntComparator implements Comparator<Integer>{
 
 		@Override
 		public int compare(Integer o1, Integer o2) {
