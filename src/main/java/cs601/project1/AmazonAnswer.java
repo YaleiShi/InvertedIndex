@@ -96,6 +96,41 @@ public class AmazonAnswer {
 	}
 	
 	/**
+	 * the general method to gather the output in the amazon message array
+	 * @param al the array having all the message
+	 * @param i the frequency, if -1, do not output
+	 * @return the result String
+	 */
+	public String reviewText(ArrayList<AmazonMessage> al, int i) {
+		StringBuilder sb = new StringBuilder();
+		for(AmazonMessage am: al) {
+			AmazonReview ar = (AmazonReview) am;
+			if(i > 0) sb.append("WordFrequency: " + i + "\n");
+			sb.append("Review ID: " + ar.getReviewID() + "\n");
+			sb.append("Score: " + ar.getScore() + "\n");
+			sb.append("Text: " + ar.getText() + "\n\n");
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * the general method to gather the output in the amazon message array
+	 * @param al the array having all the message
+	 * @param i the frequency, if -1, do not output
+	 * @return the result String
+	 */
+	public String qaText(ArrayList<AmazonMessage> al, int i) {
+		StringBuilder sb = new StringBuilder();
+		for(AmazonMessage am: al) {
+			AmazonQA ar = (AmazonQA) am;
+			if(i > 0) sb.append("WordFrequency: " + i + "\n");
+			sb.append("Question: " + ar.getQuestion() + "\n");
+			sb.append("Answer: " + ar.getAnswer() + "\n\n");
+		}
+		return sb.toString();
+	}
+	
+	/**
 	 * the function in charge of the command find
 	 * @param asin the asin number
 	 */
@@ -104,29 +139,20 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("find asin number: " + asin + "\n");
 		sb.append("********** Reviews ***********\n");
-		ArrayList<AmazonMessage> al = this.forReview.getAsinIndex().get(asin);
+		ArrayList<AmazonMessage> al = this.forReview.getAsinArray(asin);
 		if(al == null) {
 			sb.append("no review\n");
 		}else {
-			for(AmazonMessage am: al) {
-				AmazonReview ar = (AmazonReview) am;
-				sb.append("Review ID: " + ar.getReviewID() + "\n");
-				sb.append("Score: " + ar.getScore() + "\n");
-				sb.append("Text: " + ar.getText() + "\n\n");
-			}
+			sb.append(this.reviewText(al, -1));
 		}
 		
 		//search the QA
 		sb.append("********** QAs ***********\n");
-		al = this.forQA.getAsinIndex().get(asin);
+		al = this.forQA.getAsinArray(asin);
 		if(al == null) {
 			sb.append("no QA\n=======================\n");
 		}else {
-			for(AmazonMessage am: al) {
-				AmazonQA ar = (AmazonQA) am;
-				sb.append("Question: " + ar.getQuestion() + "\n");
-				sb.append("Answer: " + ar.getAnswer() + "\n\n");
-			}
+			sb.append(this.qaText(al, -1));
 			sb.append("=========================\n");
 		}
 		
@@ -142,18 +168,12 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
-		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forReview.getTermIndex().get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forReview.getTermMap(term);
 		if(ts == null) {
 			sb.append("no review\n========================\n");
 		}else {
 			for(int i: ts.keySet()) {
-				for(AmazonMessage am: ts.get(i)) {
-					AmazonReview ar = (AmazonReview) am;
-					sb.append("WordFrequency: " + i + "\n");
-					sb.append("Review ID: " + ar.getReviewID() + "\n");
-					sb.append("Score: " + ar.getScore() + "\n");
-					sb.append("Text: " + ar.getText() + "\n\n");
-				}
+				sb.append(this.reviewText(ts.get(i), i));
 			}
 			sb.append("=========================\n");
 		}
@@ -170,19 +190,13 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
-		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forQA.getTermIndex().get(term);
+		TreeMap<Integer, ArrayList<AmazonMessage>> ts = this.forQA.getTermMap(term);
 		if(ts == null) {
 			sb.append("no QA\n========================\n");
 		}else {
 			for(int i: ts.keySet()) {
-				for(AmazonMessage am: ts.get(i)) {
-				AmazonQA ar = (AmazonQA) am;
-				sb.append("WordFrequency: " + i + "\n");
-				sb.append("Question: " + ar.getQuestion() + "\n");
-				sb.append("Answer: " + ar.getAnswer() + "\n\n");
-				}
+				sb.append(this.qaText(ts.get(i), i));
 			}
-			
 			sb.append("=========================\n");
 		}
 
@@ -190,7 +204,7 @@ public class AmazonAnswer {
 	}
 	
 	/**
-	 * the function of command reviewpartialsearch
+	 * the function of command review partial search
 	 * @param term the string which user want to search
 	 */
 	public void reviewPartialSearch(String term) {
@@ -198,19 +212,7 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search review by the word: " + term + "\n");
 		sb.append("********** Reviews ***********\n");
-		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
-		for(String s: this.forReview.getTermIndex().keySet()) {
-			if(s.contains(term)) {
-				System.out.println("we find: " + s);
-				TreeMap<Integer, ArrayList<AmazonMessage>> tm = this.forReview.getTermIndex().get(s);
-				for(ArrayList<AmazonMessage> al: tm.values()) {
-					for(AmazonMessage am: al) {
-						ts.add(am);
-					}
-				}
-			}
-		}
-		
+		TreeSet<AmazonMessage> ts = this.forReview.partialSearchResult(term);
 		if(ts.size() == 0) {
 			sb.append("no review\n========================\n");
 		}else {
@@ -235,18 +237,7 @@ public class AmazonAnswer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("partial search QA by the word: " + term + "\n");
 		sb.append("********** QAs ***********\n");
-		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
-		for(String s: this.forQA.getTermIndex().keySet()) {
-			if(s.contains(term)) {
-				System.out.println("we find: " + s);
-				for(ArrayList<AmazonMessage> al: this.forQA.getTermIndex().get(s).values()) {
-					for(AmazonMessage am: al) {
-						ts.add(am);
-					}
-				}
-				
-			}
-		}
+		TreeSet<AmazonMessage> ts = this.forQA.partialSearchResult(term);
 		
 		if(ts.size() == 0) {
 			sb.append("no review\n========================\n");

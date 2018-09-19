@@ -96,6 +96,47 @@ public class InvertedIndex {
 	public HashMap<String, ArrayList<AmazonMessage>> getAsinIndex() {
 		return asinIndex;
 	}
+	
+	/**
+	 * output the array list by the asin number
+	 * @param asin asin number
+	 * @return the array list with all the message
+	 */
+	public ArrayList<AmazonMessage> getAsinArray(String asin){
+		ArrayList<AmazonMessage> al = this.asinIndex.get(asin);
+		return al;
+	}
+	
+	/**
+	 * return the tree map under the given word
+	 * @param term the word we are searching
+	 * @return the tree map
+	 */
+	public TreeMap<Integer, ArrayList<AmazonMessage>> getTermMap(String term){
+		return this.termIndex.get(term);
+	}
+	
+	/**
+	 * serve for the partial search, 
+	 * traverse the tree map to search the string
+	 * @param term the partial word
+	 * @return the tree set having all the result
+	 */
+	public TreeSet<AmazonMessage> partialSearchResult(String term){
+		TreeSet<AmazonMessage> ts = new TreeSet<AmazonMessage>();
+		for(String s: this.termIndex.keySet()) {
+			if(s.contains(term)) {
+				System.out.println("we find: " + s);
+				TreeMap<Integer, ArrayList<AmazonMessage>> tm = this.termIndex.get(s);
+				for(ArrayList<AmazonMessage> al: tm.values()) {
+					for(AmazonMessage am: al) {
+						ts.add(am);
+					}
+				}
+			}
+		}
+		return ts;
+	}
 
 	/**
 	 * the function just used to debug
